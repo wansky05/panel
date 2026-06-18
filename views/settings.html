@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Xixy Panel</title>
+    <style>
+        body { 
+            background-color: #0d1117; 
+            color: white; 
+            display: flex; 
+            flex-direction: column; 
+            min-height: 100vh; 
+            margin: 0;
+            -webkit-tap-highlight-color: transparent; 
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        
+        .bg-ptero-card { background-color: #161b22; }
+        
+        .logo-glow { box-shadow: 0 0 15px rgba(59, 130, 246, 0.3); border: 1px solid rgba(59, 130, 246, 0.2); transition: all 0.3s ease; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+        .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+
+        /* Scrollbar khusus untuk Nav Mobile */
+        .custom-scroll::-webkit-scrollbar { height: 2px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #3b82f6; }
+        
+        /* Hover Link & Button effects */
+        .nav-link { transition: 0.3s; color: #6b7280; text-decoration: none; padding-top: 16px; padding-bottom: 16px; border-bottom: 2px solid transparent; }
+        .nav-link:hover { color: white; }
+        .nav-active { color: white !important; border-bottom-color: #3b82f6 !important; }
+        
+        .btn-save:active { transform: scale(0.98); }
+        
+        input::placeholder { color: #4b5563; }
+        
+        @media (max-width: 768px) {
+            .nav-container { padding-left: 24px !important; padding-right: 24px !important; }
+
+            footer > div {
+                flex-direction: column !important; /* Ubah baris jadi kolom */
+                justify-content: center !important; /* Rata tengah secara vertikal */
+                align-items: center !important;    /* Rata tengah secara horizontal */
+                text-align: center;                /* Teks rata tengah */
+                gap: 20px !important;              /* Beri jarak antar elemen yang bertumpuk */
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="bg-ptero-card nav-container" style="padding: 16px; border-bottom: 1px solid #1f2937; display: flex; justify-content: space-between; align-items: center; padding-left: 40px; padding-right: 40px; position: sticky; top: 0; z-index: 50; box-sizing: border-box;">
+        <div style="display: flex; align-items: center; gap: 16px; cursor: pointer;" onclick="location.href='/home'">
+            <div class="logo-glow" style="width: 44px; height: 44px; border-radius: 9999px; overflow: hidden; padding: 6px; display: flex; align-items: center; justify-content: center; background-color: #0d1117; box-sizing: border-box;">
+                <img src="/logo.png" onerror="this.src='https://ui-avatars.com/api/?name=P&background=3b82f6&color=fff'" style="width: 100%; height: 100%; object-fit: cover; border-radius: 9999px;">
+            </div>
+            <div style="display: flex; flex-direction: column;">
+                <h1 style="color: white; font-weight: 900; letter-spacing: -0.05em; font-size: 18px; margin: 0;">XIXY PANEL</h1>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span class="animate-pulse" style="width: 6px; height: 6px; background-color: #3b82f6; border-radius: 9999px;"></span>
+                    <span style="font-size: 9px; color: #3b82f6; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; font-style: italic;">Settings</span>
+                </div>
+            </div>
+        </div>
+        <a href="/home" style="display: inline-block; font-size: 10px; color: #6b7280; font-weight: 700; text-transform: uppercase; border: 1px solid rgba(107, 114, 128, 0.3); padding: 8px 16px; border-radius: 12px; text-decoration: none; transition: 0.3s;" onmouseover="this.style.backgroundColor='#6b7280'; this.style.color='white'" onmouseout="this.style.backgroundColor='transparent'; this.style.color='#6b7280'">Home</a>
+    </nav>
+
+    <div class="custom-scroll" style="background-color: #111827; border-bottom: 1px solid #1f2937; display: flex; gap: 24px; px: 40px; padding-left: 40px; padding-right: 40px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; overflow-x: auto; white-space: nowrap; box-sizing: border-box;">
+        <a id="lnk-c" class="nav-link">Console</a>
+        <a id="lnk-f" class="nav-link">Files</a>
+        <a id="lnk-s" class="nav-link nav-active">Settings</a>
+        <a id="lnk-t" class="nav-link">Terminal</a>
+    </div>
+
+    <main style="padding: 1rem; max-width: 42rem; margin-left: auto; margin-right: auto; width: 100%; flex: 1; box-sizing: border-box;">
+        <div class="bg-ptero-card" style="border: 1px solid #1f2937; border-radius: 1rem; padding: 1.5rem; shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); box-sizing: border-box; margin-top: 15px;">
+            <h2 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 1.5rem; letter-spacing: -0.025em; margin-top: 0;">App Configuration</h2>
+            
+            <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                <div>
+                    <label style="display: block; font-size: 9px; color: #6b7280; text-transform: uppercase; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: 0.1em;">Main File (Entry Point)</label>
+                    <input type="text" id="mainF" placeholder="index.js" style="width: 100%; padding: 1rem; background-color: #0d1117; border: 1px solid #374151; border-radius: 0.75rem; outline: none; font-size: 0.875rem; color: white; transition: border-color 0.3s; box-sizing: border-box;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#374151'">
+                </div>
+                
+                <button id="btnSave" onclick="save()" class="btn-save" style="width: 100%; background-color: #2563eb; color: white; padding: 1rem; border-radius: 0.75rem; font-weight: 700; border: none; cursor: pointer; transition: background-color 0.3s; text-transform: uppercase; font-size: 11px; letter-spacing: 0.1em; box-shadow: 0 10px 15px -3px rgba(30, 58, 138, 0.2);" onmouseover="this.style.backgroundColor='#1d4ed8'" onmouseout="this.style.backgroundColor='#2563eb'">
+                    SIMPAN
+                </button>
+
+                <div style="pt: 2rem; border-top: 1px solid #1f2937; padding-top: 2rem;">
+                    <div>
+                        <label style="display: block; font-size: 9px; color: #ef4444;text-transform: uppercase; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: 0.1em;">Danger Zone</label>
+                    </div>
+                    <div style="background-color: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.2); padding: 1.25rem; border-radius: 1rem;">
+                        <p style="font-size: 12px; color: #6b7280; margin-bottom: 1.5rem; font-style: italic; text-align: center; line-height: 1.625; margin-top: 0;">Menghapus aplikasi akan menghapus seluruh data secara permanen dari server.</p>
+                        <button onclick="del()" style="width: 100%; border: 1px solid rgba(239, 68, 68, 0.5); background: transparent; color: #ef4444; padding: 0.875rem; border-radius: 0.75rem; font-size: 10px; font-weight: 700; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 0.1em;" onmouseover="this.style.backgroundColor='#ef4444'; this.style.color='white'" onmouseout="this.style.backgroundColor='transparent'; this.style.color='#ef4444'" onmousedown="this.style.backgroundColor='#dc2626'">
+                            HAPUS PERMANEN
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-ptero-card" style="border-top: 1px solid #1f2937; padding: 32px; margin-top: auto;">
+        <div style="max-width: 1152px; margin-left: auto; margin-right: auto; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 32px; height: 32px; border-radius: 9999px; border: 1px solid #1f2937; overflow: hidden; padding: 4px; box-sizing: border-box;">
+                    <img src="/logo.png" onerror="this.src='https://ui-avatars.com/api/?name=P&background=3b82f6&color=fff'" style="width: 100%; height: 100%; object-fit: cover; border-radius: 9999px; opacity: 0.4;">
+                </div>
+                <p style="font-size: 10px; color: #4b5563; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin: 0;">&copy; 2026 Xixy Panel • Settings</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const parts = window.location.pathname.split('/').filter(p => p.length > 0);
+        const name = parts[1];
+
+        // Nav Links
+        document.getElementById('lnk-c').href = `/dashboard/${name}/console`;
+        document.getElementById('lnk-f').href = `/dashboard/${name}/files`;
+        document.getElementById('lnk-s').href = `/dashboard/${name}/settings`;
+        document.getElementById('lnk-t').href = `/dashboard/${name}/terminal`;
+
+        async function save() {
+            const m = document.getElementById('mainF').value; 
+            if(!m) return alert("Error: Main file name is required!");
+
+            const btn = document.getElementById('btnSave');
+            const originalText = btn.innerText;
+            btn.innerText = "SAVING...";
+            btn.disabled = true;
+
+            try {
+                const r = await fetch('/api/apps/update-settings', { 
+                    method: 'POST', 
+                    headers: {'Content-Type':'application/json'}, 
+                    body: JSON.stringify({ name, mainFile: m }) 
+                });
+
+                const data = await r.json();
+
+                if(r.ok) {
+                    alert("Success: " + (data.message || "Settings updated and app restarted!"));
+                    window.location.href = `/dashboard/${name}/console`;
+                } else {
+                    alert("Error: " + (data.error || "Failed to update settings"));
+                }
+            } catch (err) {
+                alert("Connection Error: Could not connect to the panel API.");
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        async function del() { 
+            if(confirm(`WARNING: Yakin menghapus ${name.replace(/_/g, ' ')}? pilihan tidak bisa dibatalkan.`)) { 
+                try {
+                    const r = await fetch('/api/apps/delete', { 
+                        method: 'POST', 
+                        headers: {'Content-Type':'application/json'}, 
+                        body: JSON.stringify({ name }) 
+                    }); 
+                    if(r.ok) {
+                        alert("Application deleted successfully.");
+                        window.location.href = '/home'; 
+                    } else {
+                        const data = await r.json();
+                        alert("Error: " + (data.error || "Failed to delete application"));
+                    }
+                } catch (err) {
+                    alert("Connection Error: Could not delete application.");
+                }
+            } 
+        }
+    </script>
+</body>
+</html>

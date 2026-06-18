@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+    <title>Login - Xixy Panel</title>
+    <style>
+        body { 
+            background-color: #0d1117; 
+            color: white; 
+            -webkit-tap-highlight-color: transparent; 
+            margin: 0;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+        .bg-card { background-color: #161b22; }
+        .logo-glow { 
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.4); 
+            border: 2px solid rgba(59, 130, 246, 0.3);
+        }
+        
+        /* Hover effect & Active state yang tidak bisa inline */
+        .btn-signin:hover { background-color: #1d4ed8 !important; }
+        .btn-signin:active { transform: scale(0.95); }
+        
+        /* Focus effect untuk input */
+        .input-field:focus { border-color: #3b82f6 !important; }
+
+        /* Responsive adjustments */
+        @media screen and (max-width: 768px) {
+            input { font-size: 16px !important; }
+            .card-container { padding: 32px !important; }
+            .logo-wrapper { width: 80px !important; height: 80px !important; }
+            .title-text { font-size: 20px !important; }
+        }
+    </style>
+</head>
+<body style="display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 24px; box-sizing: border-box;"> 
+    
+    <div class="bg-card card-container" style="padding: 40px; border-radius: 2.5rem; border: 1px solid #1f2937; width: 100%; max-width: 400px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); text-align: center; box-sizing: border-box;">
+        
+        <div class="logo-glow logo-wrapper" style="width: 96px; height: 96px; border-radius: 9999px; margin-left: auto; margin-right: auto; margin-bottom: 24px; overflow: hidden; padding: 4px; background-color: #0d1117; box-sizing: border-box;">
+            <img src="/logo.png" 
+                 onerror="this.src='https://ui-avatars.com/api/?name=X&background=3b82f6&color=fff'" 
+                 style="width: 100%; height: 100%; object-fit: cover; border-radius: 9999px;">
+        </div>
+
+        <div style="margin-bottom: 32px;">
+            <h2 class="title-text" style="font-size: 24px; font-weight: 900; letter-spacing: -0.05em; font-style: italic; margin: 0; text-transform: uppercase;">XIXY PANEL</h2>
+            <div style="display: flex; justify-content: center; align-items: center; gap: 8px; mt-4px; margin-top: 4px;">
+                <span style="width: 4px; height: 4px; background-color: #3b82f6; border-radius: 9999px;"></span>
+                <p style="font-size: 9px; color: #6b7280; font-weight: 700; text-transform: uppercase; letter-spacing: 0.2em; font-style: italic; margin: 0;">Secure Authentication</p>
+                <span style="width: 4px; height: 4px; background-color: #3b82f6; border-radius: 9999px;"></span>
+            </div>
+        </div>
+        
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+            <input type="text" id="u" placeholder="Username" class="input-field"
+                   style="width: 100%; padding: 16px; background-color: #111827; border: 1px solid #374151; border-radius: 16px; outline: none; transition: all 0.2s; text-align: center; color: white; box-sizing: border-box;">
+            
+            <input type="password" id="p" placeholder="Password" class="input-field"
+                   style="width: 100%; padding: 16px; background-color: #111827; border: 1px solid #374151; border-radius: 16px; outline: none; transition: all 0.2s; text-align: center; color: white; box-sizing: border-box;">
+            
+            <button onclick="login()" class="btn-signin"
+                    style="width: 100%; background-color: #2563eb; border: none; color: white; padding: 16px; border-radius: 16px; font-weight: 900; font-size: 12px; letter-spacing: 0.1em; transition: all 0.2s; cursor: pointer; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); margin-top: 8px;">
+                SIGN IN
+            </button>
+        </div>
+
+        <p style="margin-top: 40px; font-size: 9px; color: #4b5563; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;">© 2026 Xixy Panel by Xixy Dev Team</p>
+    </div>
+
+    <script>
+        async function login() {
+            const u = document.getElementById('u');
+            const p = document.getElementById('p');
+            
+            if(!u.value || !p.value) return alert("Please fill all fields");
+
+            try {
+                const r = await fetch('/api/login', { 
+                    method: 'POST', 
+                    headers: {'Content-Type':'application/json'}, 
+                    body: JSON.stringify({user: u.value, pass: p.value}) 
+                });
+                
+                if(r.ok) {
+                    location.href = '/home';
+                } else {
+                    alert("Invalid credentials");
+                }
+            } catch (e) {
+                alert("Server error");
+            }
+        }
+    </script>
+</body>
+</html>

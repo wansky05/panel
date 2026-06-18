@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Console - Xixy Panel</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        body { 
+            background-color: #0d1117;
+            color: white;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            -webkit-tap-highlight-color: transparent;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+        
+        /* Animasi Pulse */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+        .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        .bg-ptero-card { background-color: #161b22; }
+
+        .logo-glow { box-shadow: 0 0 15px rgba(59, 130, 246, 0.3); border: 1px solid rgba(59, 130, 246, 0.2); transition: all 0.3s ease; }
+        
+        /* Scrollbar khusus untuk output console */
+        #out::-webkit-scrollbar { width: 6px; }
+        #out::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+        #out { scroll-behavior: smooth; word-wrap: break-word; overflow-wrap: break-word; }
+        #out span { display: block; min-height: 1em; }
+
+        /* Custom Scrollbar untuk Nav Tab Mobile */
+        .custom-scroll::-webkit-scrollbar { height: 2px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #3b82f6; }
+
+        /* Hover Link & Button effects */
+        .nav-link { transition: 0.3s; color: #6b7280; text-decoration: none; padding-top: 16px; padding-bottom: 16px; border-bottom: 2px solid transparent; }
+        .nav-link:hover { color: white; }
+        .nav-active { color: white !important; border-bottom-color: #3b82f6 !important; }
+        
+        .btn-ctrl { transition: all 0.2s; cursor: pointer; display: flex; flex: 1; justify-content: center; align-items: center; }
+        .btn-ctrl:hover { color: white !important; }
+
+        @media (max-width: 768px) {
+            .nav-container { padding-left: 24px !important; padding-right: 24px !important; }
+            .main-content { padding: 16px !important; }
+            .stats-grid { grid-template-columns: 1fr !important; }
+            .console-out { height: 350px !important; }
+            .btn-group { flex-direction: row; flex-wrap: wrap; }
+
+            footer > div {
+                flex-direction: column !important; /* Ubah baris jadi kolom */
+                justify-content: center !important; /* Rata tengah secara vertikal */
+                align-items: center !important;    /* Rata tengah secara horizontal */
+                text-align: center;                /* Teks rata tengah */
+                gap: 20px !important;              /* Beri jarak antar elemen yang bertumpuk */
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="bg-ptero-card nav-container" style="padding: 16px; border-bottom: 1px solid #1f2937; display: flex; justify-content: space-between; align-items: center; padding-left: 40px; padding-right: 40px; position: sticky; top: 0; z-index: 50; box-sizing: border-box;">
+        <div style="display: flex; align-items: center; gap: 16px; cursor: pointer;" onclick="location.href='/home'">
+            <div class="logo-glow" style="width: 44px; height: 44px; border-radius: 9999px; overflow: hidden; padding: 6px; display: flex; align-items: center; justify-content: center; background-color: #0d1117; box-sizing: border-box;">
+                <img src="/logo.png" onerror="this.src='https://ui-avatars.com/api/?name=P&background=3b82f6&color=fff'" style="width: 100%; height: 100%; object-fit: cover; border-radius: 9999px;">
+            </div>
+            <div style="display: flex; flex-direction: column;">
+                <h1 style="color: white; font-weight: 900; letter-spacing: -0.05em; font-size: 18px; margin: 0;">XIXY PANEL</h1>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span class="animate-pulse" style="width: 6px; height: 6px; background-color: #3b82f6; border-radius: 9999px;"></span>
+                    <span style="font-size: 9px; color: #3b82f6; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; font-style: italic;">Console</span>
+                </div>
+            </div>
+        </div>
+        <a href="/home" style="display: inline-block; font-size: 10px; color: #6b7280; font-weight: 700; text-transform: uppercase; border: 1px solid rgba(107, 114, 128, 0.3); padding: 8px 16px; border-radius: 12px; text-decoration: none; transition: 0.3s;" onmouseover="this.style.backgroundColor='#6b7280'; this.style.color='white'" onmouseout="this.style.backgroundColor='transparent'; this.style.color='#6b7280'">Home</a>
+    </nav>
+
+    <div class="custom-scroll" style="background-color: #111827; border-bottom: 1px solid #1f2937; display: flex; gap: 24px; px: 40px; padding-left: 40px; padding-right: 40px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; overflow-x: auto; white-space: nowrap; box-sizing: border-box;">
+        <a id="lnk-c" class="nav-link nav-active">Console</a>
+        <a id="lnk-f" class="nav-link">Files</a>
+        <a id="lnk-s" class="nav-link">Settings</a>
+        <a id="lnk-t" class="nav-link">Terminal</a>
+    </div>
+
+    <main class="main-content" style="padding: 40px; max-width: 1152px; margin-left: auto; margin-right: auto; width: 100%; flex: 1; box-sizing: border-box;">
+        <div class="stats-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px;">
+            <div class="bg-ptero-card" style="padding: 20px; border-radius: 16px; border: 1px solid #1f2937; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
+                <p style="font-size: 10px; color: #6b7280; font-weight: 700; text-transform: uppercase; margin: 0 0 4px 0; letter-spacing: 0.1em;">CPU Usage</p>
+                <p id="cpu" style="font-size: 24px; font-family: monospace; color: #60a5fa; margin: 0;">0%</p>
+            </div>
+            <div class="bg-ptero-card" style="padding: 20px; border-radius: 16px; border: 1px solid #1f2937; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
+                <p style="font-size: 10px; color: #6b7280; font-weight: 700; text-transform: uppercase; margin: 0 0 4px 0; letter-spacing: 0.1em;">Memory</p>
+                <p id="mem" style="font-size: 24px; font-family: monospace; color: #4ade80; margin: 0;">0 MB</p>
+            </div>
+            <div class="bg-ptero-card" style="padding: 20px; border-radius: 16px; border: 1px solid #1f2937; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
+                <p style="font-size: 10px; color: #6b7280; font-weight: 700; text-transform: uppercase; margin: 0 0 4px 0; letter-spacing: 0.1em;">Uptime</p>
+                <p id="upt" style="font-size: 24px; font-family: monospace; color: #facc15; margin: 0;">0s</p>
+            </div>
+        </div>
+
+        <div id="out" class="console-out" style="background-color: black; height: 450px; padding: 20px; border-radius: 16px; font-family: monospace; font-size: 11px; overflow-y: auto; border: 1px solid #1f2937; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); mb-16px; margin-bottom: 16px; line-height: 1.6; box-sizing: border-box;"></div>
+        
+        <div class="btn-group" style="display: flex; flex-wrap: wrap; gap: 12px; padding-top: 32px; border-top: 1px solid #1f2937;">
+            <button onclick="ctrl('start')" class="btn-ctrl" style="background-color: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); padding: 12px 24px; border-radius: 12px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;" onmouseover="this.style.backgroundColor='#10b981'" onmouseout="this.style.backgroundColor='rgba(16, 185, 129, 0.1)'">Start</button>
+            <button onclick="ctrl('restart')" class="btn-ctrl" style="background-color: rgba(202, 138, 4, 0.1); color: #facc15; border: 1px solid rgba(202, 138, 4, 0.2); padding: 12px 24px; border-radius: 12px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;" onmouseover="this.style.backgroundColor='#eab308'" onmouseout="this.style.backgroundColor='rgba(202, 138, 4, 0.1)'">Restart</button>
+            <button onclick="ctrl('stop')" class="btn-ctrl" style="background-color: rgba(220, 38, 38, 0.1); color: #ef4444; border: 1px solid rgba(220, 38, 38, 0.2); padding: 12px 24px; border-radius: 12px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;" onmouseover="this.style.backgroundColor='#dc2626'" onmouseout="this.style.backgroundColor='rgba(220, 38, 38, 0.1)'">Stop</button>
+            <button onclick="ctrl('delete')" class="btn-ctrl" style="background-color: rgba(220, 38, 38, 0.1); color: #ef4444; border: 1px solid rgba(220, 38, 38, 0.2); padding: 12px 24px; border-radius: 12px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;" onmouseover="this.style.backgroundColor='#dc2626'" onmouseout="this.style.backgroundColor='rgba(220, 38, 38, 0.1)'">Kill</button>
+            <button id="btn-install" onclick="installDeps()" class="btn-ctrl" style="background-color: rgba(37, 99, 235, 0.1); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.2); padding: 12px 24px; border-radius: 12px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;" onmouseover="this.style.backgroundColor='#2563eb'; this.style.color='white'" onmouseout="this.style.backgroundColor='rgba(37, 99, 235, 0.1)'">NPM Install</button>
+        </div>
+    </main>
+
+    <footer class="bg-ptero-card" style="border-top: 1px solid #1f2937; padding: 32px; margin-top: auto;">
+        <div style="max-width: 1152px; margin-left: auto; margin-right: auto; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 32px; height: 32px; border-radius: 9999px; border: 1px solid #1f2937; overflow: hidden; padding: 4px; box-sizing: border-box;">
+                    <img src="/logo.png" onerror="this.src='https://ui-avatars.com/api/?name=P&background=3b82f6&color=fff'" style="width: 100%; height: 100%; object-fit: cover; border-radius: 9999px; opacity: 0.4;">
+                </div>
+                <p style="font-size: 10px; color: #4b5563; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin: 0;">&copy; 2026 Xixy Panel • Console</p>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span id="socket-status" style="width: 8px; height: 8px; background-color: #ef4444; border-radius: 9999px;"></span>
+                <span id="socket-text" style="font-size: 9px; color: #6b7280; font-weight: 700; text-transform: uppercase; letter-spacing: -0.025em;">Disconnected</span>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const parts = window.location.pathname.split('/').filter(p => p.length > 0);
+        const appName = parts[1];
+        const out = document.getElementById('out');
+
+        // Nav Links
+        document.getElementById('lnk-c').href = `/dashboard/${appName}/console`;
+        document.getElementById('lnk-f').href = `/dashboard/${appName}/files`;
+        document.getElementById('lnk-s').href = `/dashboard/${appName}/settings`;
+        document.getElementById('lnk-t').href = `/dashboard/${appName}/terminal`;
+
+        // --- SISTEM LOGGING ---
+        function appendLog(htmlMsg) {
+            out.innerHTML += htmlMsg;
+            if(out.innerHTML.length > 60000) {
+                out.innerHTML = out.innerHTML.slice(-30000);
+            }
+            out.scrollTop = out.scrollHeight;
+        }
+
+        async function loadHistory() {
+            try {
+                const r = await fetch(`/api/apps/logs/${appName}`);
+                const data = await r.json();
+                if (data.logs && data.logs.length > 0) {
+                    out.innerHTML = data.logs.join('');
+                    out.scrollTop = out.scrollHeight;
+                }
+            } catch (e) { console.error("History fail:", e); }
+        }
+
+        function formatUptime(seconds) {
+            const d = Math.floor(seconds / (3600 * 24));
+            const h = Math.floor((seconds % (3600 * 24)) / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            const s = Math.floor(seconds % 60);
+            const parts = [];
+            if (d > 0) parts.push(`${d}d`);
+            if (h > 0) parts.push(`${h}h`);
+            if (m > 0) parts.push(`${m}m`);
+            if (s > 0 || parts.length === 0) parts.push(`${s}s`);
+            return parts.join(' ');
+        }
+
+        // --- SOCKET.IO ---
+        const socket = io();
+        
+        socket.on('connect', () => {
+            socket.emit('join-app', appName);
+            loadHistory(); 
+            document.getElementById('socket-status').style.backgroundColor = '#22c55e';
+            document.getElementById('socket-text').innerText = "Connected";
+        });
+
+        socket.on('disconnect', () => {
+            document.getElementById('socket-status').style.backgroundColor = '#ef4444';
+            document.getElementById('socket-text').innerText = "Disconnected";
+        });
+
+        socket.on('log-data', d => appendLog(d));
+
+        socket.on('resource-update', d => {
+            document.getElementById('cpu').innerText = d.cpu + '%';
+            document.getElementById('mem').innerText = d.memory;
+            if(d.uptime) document.getElementById('upt').innerText = formatUptime(d.uptime);
+        });
+
+        // --- ACTIONS ---
+        async function installDeps() {
+            if(!confirm("Lanjut menginstall dependensi?")) return;
+            const btn = document.getElementById('btn-install');
+            btn.innerText = "INSTALLING...";
+            btn.disabled = true;
+
+            try {
+                const r = await fetch('/api/apps/install', {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({ name: appName })
+                });
+                const data = await r.json();
+                if(!r.ok) alert(data.error);
+            } catch (e) {
+                alert("Connection failed.");
+            } finally {
+                btn.innerText = "NPM INSTALL";
+                btn.disabled = false;
+            }
+        }
+
+        async function ctrl(action) {
+            const timestamp = new Date().toLocaleTimeString();
+            let color = "#3b82f6";
+            if(action === 'start') color = "#10b981";
+            if(action === 'stop') { color = "#ef4444";
+            document.getElementById('upt').innerText = formatUptime(0); 
+            document.getElementById('cpu').innerText = '0%';
+            document.getElementById('mem').innerText = '0 MB';
+        }
+
+            appendLog(`<div style="color: ${color}; font-weight: bold; margin: 5px 0;">[SYSTEM] Action ${action.toUpperCase()} sent at ${timestamp}</div>`);
+
+            try {
+                const response = await fetch('/api/control', { 
+                    method: 'POST', 
+                    headers: {'Content-Type':'application/json'}, 
+                    body: JSON.stringify({name: appName, action}) 
+                });
+                const result = await response.json();
+
+                if (!response.ok) {
+                    if (result.error && result.error.includes("Entry Point")) {
+                        if (confirm(result.error + "\n\nLanjut Ke halaman Settings?")) {
+                            location.href = `/dashboard/${appName}/settings`;
+                        }
+                    } else {
+                        appendLog(`<div style="color: #ef4444;">[ERROR] ${action.toUpperCase()} failed: ${result.error}</div>`);
+                    }
+                }
+            } catch (e) { 
+                appendLog(`<div style="color: #ef4444;">[ERROR] Connection failed during ${action.toUpperCase()}</div>`);
+            }
+        }
+    </script>
+</body>
+</html>

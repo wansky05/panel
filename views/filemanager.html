@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Files - Xixy Panel</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.2/ace.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.2/ext-language_tools.js"></script>
+    <style>
+        body {
+            background-color: #0d1117;
+            color: white;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            -webkit-tap-highlight-color: transparent;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        /* Animasi Pulse */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+        .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        .bg-ptero-card { background-color: #161b22; }
+
+        .logo-glow { box-shadow: 0 0 15px rgba(59, 130, 246, 0.3); border: 1px solid rgba(59, 130, 246, 0.2); transition: all 0.3s ease; }
+
+        /* Custom Scrollbar untuk Nav Tab Mobile */
+        .custom-scroll::-webkit-scrollbar { height: 2px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #3b82f6; }
+
+        /* Hover Link & Button effects */
+        .nav-link { transition: 0.3s; color: #6b7280; text-decoration: none; padding-top: 16px; padding-bottom: 16px; border-bottom: 2px solid transparent; }
+        .nav-link:hover { color: white; }
+        .nav-active { color: white !important; border-bottom-color: #3b82f6 !important; }
+
+        tr:hover { background-color: rgba(31, 41, 55, 0.4); }
+        .file-actions { opacity: 0; transition: 0.2s; display: flex; justify-content: flex-end; gap: 16px; }
+        tr:hover .file-actions { opacity: 1; }
+        #ace-editor { position: absolute; top: 0; right: 0; bottom: 0; left: 0; font-size: 14px; }
+
+        @media (max-width: 768px) { 
+            .nav-container { padding-left: 24px !important; padding-right: 24px !important; }
+            .file-actions { opacity: 1; } 
+            .hide-mobile { display: none; }
+            
+            footer > div {
+                flex-direction: column !important; /* Ubah baris jadi kolom */
+                justify-content: center !important; /* Rata tengah secara vertikal */
+                align-items: center !important;    /* Rata tengah secara horizontal */
+                text-align: center;                /* Teks rata tengah */
+                gap: 20px !important;              /* Beri jarak antar elemen yang bertumpuk */
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="bg-ptero-card nav-container" style="padding: 16px; border-bottom: 1px solid #1f2937; display: flex; justify-content: space-between; align-items: center; padding-left: 40px; padding-right: 40px; position: sticky; top: 0; z-index: 50; box-sizing: border-box;">
+        <div style="display: flex; align-items: center; gap: 16px; cursor: pointer;" onclick="location.href='/home'">
+            <div class="logo-glow" style="width: 44px; height: 44px; border-radius: 9999px; overflow: hidden; padding: 6px; display: flex; align-items: center; justify-content: center; background-color: #0d1117; box-sizing: border-box;">
+                <img src="/logo.png" onerror="this.src='https://ui-avatars.com/api/?name=P&background=3b82f6&color=fff'" style="width: 100%; height: 100%; object-fit: cover; border-radius: 9999px;">
+            </div>
+            <div style="display: flex; flex-direction: column;">
+                <h1 style="color: white; font-weight: 900; letter-spacing: -0.05em; font-size: 18px; margin: 0;">XIXY PANEL</h1>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span class="animate-pulse" style="width: 6px; height: 6px; background-color: #3b82f6; border-radius: 9999px;"></span>
+                    <span style="font-size: 9px; color: #3b82f6; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; font-style: italic;">Files</span>
+                </div>
+            </div>
+        </div>
+        <a href="/home" style="display: inline-block; font-size: 10px; color: #6b7280; font-weight: 700; text-transform: uppercase; border: 1px solid rgba(107, 114, 128, 0.3); padding: 8px 16px; border-radius: 12px; text-decoration: none; transition: 0.3s;" onmouseover="this.style.backgroundColor='#6b7280'; this.style.color='white'" onmouseout="this.style.backgroundColor='transparent'; this.style.color='#6b7280'">Home</a>
+    </nav>
+
+    <div class="custom-scroll" style="background-color: #111827; border-bottom: 1px solid #1f2937; display: flex; gap: 24px; px: 40px; padding-left: 40px; padding-right: 40px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; overflow-x: auto; white-space: nowrap; box-sizing: border-box;">
+        <a id="lnk-c" class="nav-link">Console</a>
+        <a id="lnk-f" class="nav-link  nav-active">Files</a>
+        <a id="lnk-s" class="nav-link">Settings</a>
+        <a id="lnk-t" class="nav-link">Terminal</a>
+    </div>
+
+    <main style="padding: clamp(1rem, 5vw, 2.5rem); max-width: 72rem; margin: 0 auto; width: 100%; box-sizing: border-box; flex: 1;">
+        <div class="custom-scroll" style="margin-bottom: 24px; display: flex; align-items: center; gap: 8px; font-family: monospace; font-size: 11px; background: rgba(17, 24, 39, 0.5); padding: 12px; border-radius: 12px; border: 1px solid #1f2937; overflow-x: auto; white-space: nowrap;">
+            <button onclick="changeDir('')" style="background: none; border: none; color: #3b82f6; cursor: pointer; font-weight: bold; text-transform: uppercase;"><i class="bi bi-hdd-network"></i> root</button>
+            <div id="breadcrumb-list" style="display: flex; align-items: center; gap: 8px; color: #4b5563;"></div>
+        </div>
+
+        <div id="uploadProgressContainer" style="display: none; position: fixed; bottom: 40px; right: 24px; left: 24px; max-width: 320px; background: #111827; border: 1px solid #1f2937; rounded: 16px; padding: 16px; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); z-index: 1001; margin-left: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <span style="font-size: 10px; font-weight: bold; text-transform: uppercase; color: #60a5fa;">Uploading...</span>
+                <span id="progressPercent" style="font-size: 10px; font-family: monospace;">0%</span>
+            </div>
+            <div style="width: 100%; background: #1f2937; height: 6px; border-radius: 999px; overflow: hidden;">
+                <div id="progressBar" style="background: #3b82f6; height: 100%; width: 0%; transition: width 0.3s;"></div>
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; flex-wrap: wrap; gap: 16px;">
+            <h2 style="margin: 0; font-size: 24px; font-weight: bold; letter-spacing: -0.025em;">File Manager</h2>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                <div id="mass-actions" style="display: none; gap: 8px;">
+                    <button onclick="moveSelected()" style="background: rgba(168, 85, 247, 0.1); color: #a855f7; border: 1px solid rgba(168, 85, 247, 0.3); padding: 8px 12px; border-radius: 12px; font-size: 10px; font-weight: bold; cursor: pointer; text-transform: uppercase;"><i class="bi bi-arrows-move"></i> <span class="hide-mobile">Move</span></button>
+                    <button onclick="archiveSelected()" style="background: rgba(234, 179, 8, 0.1); color: #eab308; border: 1px solid rgba(234, 179, 8, 0.3); padding: 8px 12px; border-radius: 12px; font-size: 10px; font-weight: bold; cursor: pointer; text-transform: uppercase;"><i class="bi bi-file-zip"></i> <span class="hide-mobile">Archive</span></button>
+                    <button onclick="deleteSelected()" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); padding: 8px 12px; border-radius: 12px; font-size: 10px; font-weight: bold; cursor: pointer; text-transform: uppercase;"><i class="bi bi-trash"></i> <span class="hide-mobile">Delete</span></button>
+                </div>
+                <button onclick="document.getElementById('fileInput').click()" style="background: #2563eb; color: white; border: none; padding: 8px 16px; border-radius: 12px; font-size: 10px; font-weight: bold; cursor: pointer; text-transform: uppercase;"><i class="bi bi-upload"></i> Upload</button>
+                <input type="file" id="fileInput" style="display: none;" onchange="uploadFile(this)">
+                <button onclick="createNewFile()" style="background: #1f2937; color: white; border: none; padding: 8px 16px; border-radius: 12px; font-size: 10px; font-weight: bold; cursor: pointer; text-transform: uppercase;"><i class="bi bi-plus-lg"></i> New File</button>
+                <button onclick="createNewFolder()" style="background: #1f2937; color: white; border: none; padding: 8px 16px; border-radius: 12px; font-size: 10px; font-weight: bold; cursor: pointer; text-transform: uppercase;"><i class="bi bi-folder-plus"></i> New Folder</button>
+            </div>
+        </div>
+
+        <div style="background: #161b22; border: 1px solid #1f2937; border-radius: 16px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);">
+            <div class="custom-scroll" style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;">
+                    <thead style="background: rgba(13, 17, 23, 0.8); color: #6b7280; text-transform: uppercase; font-size: 10px; letter-spacing: 0.1em; font-weight: bold;">
+                        <tr>
+                            <th style="padding: 16px; width: 40px; text-align: center;"><input type="checkbox" id="main-check" onclick="selAll(this.checked)" style="cursor: pointer; width: 16px; height: 16px;"></th>
+                            <th style="padding: 16px;">Name</th>
+                            <th style="padding: 16px; text-align: right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="flist" style="color: #e5e7eb;"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <div id="editorModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 1000; padding: 20px; box-sizing: border-box;">
+        <div style="max-width: 1152px; margin: 0 auto; height: 100%; background: #1e1e1e; border: 1px solid #374151; border-radius: 16px; display: flex; flex-direction: column; overflow: hidden;">
+            <div style="padding: 16px; background: #252526; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333;">
+                <span id="editingFileName" style="font-family: monospace; font-size: 10px; color: #60a5fa; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 16px;"></span>
+                <div style="display: flex; gap: 12px; flex-shrink: 0;">
+                    <button onclick="closeEditor()" style="background: none; border: none; color: #9ca3af; cursor: pointer; font-size: 10px; font-weight: bold; text-transform: uppercase;">Cancel</button>
+                    <button onclick="saveFile()" style="background: #2563eb; color: white; border: none; padding: 6px 20px; border-radius: 8px; font-size: 10px; font-weight: bold; cursor: pointer; text-transform: uppercase;">Save</button>
+                </div>
+            </div>
+            <div style="flex: 1; position: relative;">
+                <div id="ace-editor"></div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-ptero-card" style="border-top: 1px solid #1f2937; padding: 32px; margin-top: auto;">
+        <div style="max-width: 1152px; margin-left: auto; margin-right: auto; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 32px; height: 32px; border-radius: 9999px; border: 1px solid #1f2937; overflow: hidden; padding: 4px; box-sizing: border-box;">
+                    <img src="/logo.png" onerror="this.src='https://ui-avatars.com/api/?name=P&background=3b82f6&color=fff'" style="width: 100%; height: 100%; object-fit: cover; border-radius: 9999px; opacity: 0.4;">
+                </div>
+                <p style="font-size: 10px; color: #4b5563; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin: 0;">&copy; 2026 Xixy Panel • File Manager</p>
+            </div>
+        </div>
+
+    <script>
+        // -- INISIALISASI ACE EDITOR --
+        const aceEditor = ace.edit("ace-editor");
+        ace.require("ace/ext/language_tools");
+        aceEditor.setTheme("ace/theme/dracula");
+        aceEditor.session.setMode("ace/mode/javascript");
+        aceEditor.setOptions({
+            enableBasicAutocompletion: true,
+            enableLiveAutocompletion: true,
+            enableSnippets: true,
+            showPrintMargin: false,
+            useSoftTabs: true,
+            tabSize: 2,
+            wrap: true
+        });
+
+        const modeMap = { "js": "javascript", "json": "json", "html": "html", "css": "css", "php": "php", "py": "python", "md": "markdown", "sh": "sh", "txt": "text" };
+
+        // -- STATE & KONFIGURASI --
+        const parts = window.location.pathname.split('/').filter(p => p.length > 0);
+        const name = parts[1];
+        let currentDir = "";
+        let currentEditingPath = "";
+
+        // Set Link Navigasi
+        document.getElementById('lnk-c').href = `/dashboard/${name}/console`;
+        document.getElementById('lnk-f').href = `/dashboard/${name}/files`;
+        document.getElementById('lnk-s').href = `/dashboard/${name}/settings`;
+        document.getElementById('lnk-t').href = `/dashboard/${name}/terminal`;
+
+        // -- CORE FUNCTIONS --
+        async function load(dir = "") {
+            currentDir = dir;
+            updateBreadcrumbs();
+            try {
+                const r = await fetch(`/api/files?appName=${name}&dir=${encodeURIComponent(currentDir)}`);
+                const data = await r.json();
+                const tb = document.getElementById('flist');
+                
+                if (!data || data.length === 0) {
+                    tb.innerHTML = `<tr><td colspan="3" style="padding: 40px; text-align: center; color: #4b5563; text-transform: uppercase; letter-spacing: 0.3em; font-size: 10px;">Folder Kosong</td></tr>`;
+                    return;
+                }
+                
+                tb.innerHTML = data.map(f => {
+                    const fullPath = currentDir ? `${currentDir}/${f.name}` : f.name;
+                    const isZip = f.name.toLowerCase().match(/\.(zip|tar\.gz|tgz)$/);
+                    return `
+                    <tr style="border-bottom: 1px solid rgba(31, 41, 55, 0.5);">
+                        <td style="padding: 16px; text-align: center;"><input type="checkbox" class="f-sel" value="${fullPath}" onchange="chk()" style="cursor: pointer; width: 16px; height: 16px;"></td>
+                        <td style="padding: 16px;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <span style="font-size: 18px;">${f.isDirectory ? '📁' : (isZip ? '📦' : '📄')}</span>
+                                <span style="font-weight: 500; color: #d1d5db; cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" 
+                                      onclick="${f.isDirectory ? `load('${fullPath}')` : `openEditor('${fullPath}')`}"
+                                      onmouseover="this.style.color='#3b82f6'" onmouseout="this.style.color='#d1d5db'">
+                                    ${f.name}
+                                </span>
+                            </div>
+                        </td>
+                        <td style="padding: 16px; text-align: right;">
+                            <div class="file-actions">
+                                <button title="Move" onclick="moveFile('${fullPath}','${f.name}')" style="background:none; border:none; color:#6b7280; cursor:pointer;" onmouseover="this.style.color='#a855f7'" onmouseout="this.style.color='#6b7280'"><i class="bi bi-arrows-move"></i></button>
+                                <button title="Rename" onclick="renameFile('${fullPath}','${f.name}')" style="background:none; border:none; color:#6b7280; cursor:pointer;" onmouseover="this.style.color='#eab308'" onmouseout="this.style.color='#6b7280'"><i class="bi bi-fonts"></i></button>
+                                ${!f.isDirectory ? `
+                                    ${isZip ? `<button title="Unarchive" onclick="unarchive('${fullPath}')" style="background:none; border:none; color:#eab308; cursor:pointer;"><i class="bi bi-box-arrow-up"></i></button>` : ''}
+                                    <button title="Edit" onclick="openEditor('${fullPath}')" style="background:none; border:none; color:#6b7280; cursor:pointer;" onmouseover="this.style.color='#3b82f6'" onmouseout="this.style.color='#6b7280'"><i class="bi bi-pencil-square"></i></button>
+                                    <a title="Download" href="/api/files/download?appName=${name}&filePath=${encodeURIComponent(fullPath)}" style="color:#6b7280;" onmouseover="this.style.color='#10b981'" onmouseout="this.style.color='#6b7280'"><i class="bi bi-download"></i></a>
+                                ` : ''}
+                                <button title="Delete" onclick="deleteFile('${fullPath}')" style="background:none; border:none; color:#6b7280; cursor:pointer;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#6b7280'"><i class="bi bi-trash"></i></button>
+                            </div>
+                        </td>
+                    </tr>`;
+                }).join('');
+            } catch (e) { console.error("Load fail:", e); }
+        }
+
+        function updateBreadcrumbs() {
+            const bc = document.getElementById('breadcrumb-list');
+            if (!currentDir) { bc.innerHTML = ""; return; }
+            const folders = currentDir.split('/');
+            let pathAcc = "";
+            bc.innerHTML = folders.map((f, i) => {
+                pathAcc += (i === 0 ? f : '/' + f);
+                const thisPath = pathAcc;
+                return `<span>/</span><button onclick="load('${thisPath}')" style="background:none; border:none; color:#3b82f6; cursor:pointer; font-family:inherit; font-size:inherit;">${f}</button>`;
+            }).join('');
+        }
+
+        // -- FILE OPERATIONS --
+        window.openEditor = async function(path) {
+            currentEditingPath = path;
+            document.getElementById('editingFileName').innerText = path;
+            try {
+                const r = await fetch(`/api/files/content?appName=${name}&filePath=${encodeURIComponent(path)}`);
+                const data = await r.json();
+                const ext = path.split('.').pop().toLowerCase();
+                aceEditor.setValue(data.content || "", -1);
+                aceEditor.session.setMode("ace/mode/" + (modeMap[ext] || "text"));
+                document.getElementById('editorModal').style.display = 'block';
+                aceEditor.resize(); aceEditor.focus();
+            } catch (e) { alert("Gagal memuat file."); }
+        };
+
+        window.saveFile = async function() {
+            try {
+                const res = await fetch('/api/files/save', { 
+                    method:'POST', headers:{'Content-Type':'application/json'}, 
+                    body:JSON.stringify({appName:name, filePath:currentEditingPath, content: aceEditor.getValue() })
+                });
+                if(res.ok) { closeEditor(); load(currentDir); }
+            } catch (e) { alert("Gagal menyimpan."); }
+        };
+
+        function uploadFile(input) {
+            if (!input.files[0]) return;
+            const formData = new FormData();
+            formData.append('file', input.files[0]);
+            formData.append('appName', name);
+            formData.append('currentDir', currentDir);
+
+            const container = document.getElementById('uploadProgressContainer');
+            const bar = document.getElementById('progressBar');
+            const percentText = document.getElementById('progressPercent');
+            container.style.display = 'block';
+
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '/api/files/upload', true);
+            xhr.upload.onprogress = (e) => {
+                if (e.lengthComputable) {
+                    const percent = Math.round((e.loaded / e.total) * 100);
+                    bar.style.width = percent + '%';
+                    percentText.innerText = percent + '%';
+                }
+            };
+            xhr.onload = () => { setTimeout(() => { container.style.display = 'none'; bar.style.width = '0%'; load(currentDir); }, 1000); };
+            xhr.send(formData);
+            input.value = '';
+        }
+
+        // -- MASS ACTIONS & HELPERS --
+        window.chk = () => {
+            const count = document.querySelectorAll('.f-sel:checked').length;
+            document.getElementById('mass-actions').style.display = count > 0 ? 'flex' : 'none';
+        };
+
+        window.selAll = (s) => { document.querySelectorAll('.f-sel').forEach(c => c.checked = s); chk(); };
+        window.closeEditor = () => document.getElementById('editorModal').style.display = 'none';
+        window.changeDir = (d) => load(d);
+
+        async function moveSelected() {
+            const files = Array.from(document.querySelectorAll('.f-sel:checked')).map(cb => cb.value);
+            const targetFolder = prompt("Pindahkan ke folder (relatif ke root, misal 'src/'):", "");
+            if(targetFolder === null) return;
+            for(const f of files) {
+                const fileName = f.split('/').pop();
+                const target = targetFolder + (targetFolder.endsWith('/') || targetFolder === "" ? "" : "/") + fileName;
+                await fetch('/api/files/rename', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({appName:name, oldPath:f, newPath:target})});
+            }
+            load(currentDir);
+        }
+
+        async function archiveSelected() {
+            const files = Array.from(document.querySelectorAll('.f-sel:checked')).map(cb => cb.value);
+            const zipName = prompt("Nama file ZIP:", "archive.zip");
+            if(zipName) { 
+                const fullZipPath = currentDir ? `${currentDir}/${zipName}` : zipName;
+                await fetch('/api/files/archive', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({appName:name, files, zipName: fullZipPath})}); 
+                load(currentDir);
+            }
+        }
+
+        async function deleteSelected() {
+            const files = Array.from(document.querySelectorAll('.f-sel:checked')).map(cb => cb.value);
+            if(confirm(`Hapus ${files.length} item?`)) { 
+                for(const f of files) await fetch('/api/files/delete', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({appName:name, filePath:f})}); 
+                load(currentDir);
+            }
+        }
+
+        // -- INDIVIDUAL ACTIONS --
+        window.deleteFile = async (f) => { if(confirm(`Hapus ${f}?`)) { await fetch('/api/files/delete', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({appName:name, filePath:f})}); load(currentDir); }};
+        window.renameFile = async (f, old) => { const n = prompt("Nama Baru:", old); if(n) { await fetch('/api/files/rename',{method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({appName:name, oldPath:f, newPath:n})}); load(currentDir); }};
+        window.moveFile = async (f, old) => { const n = prompt("Pindahkan ke (jalur relatif):", old); if(n && n !== f) { await fetch('/api/files/rename', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({appName:name, oldPath:f, newPath:n})}); load(currentDir); }};
+        window.unarchive = async (f) => { if(confirm(`Ekstrak ${f} di folder ini?`)) { await fetch('/api/files/unarchive', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({appName:name, filePath:f, outputDir: currentDir})}); load(currentDir); } };
+        
+        window.createNewFile = async () => { 
+            const f = prompt("Nama file baru:"); 
+            if(f) { 
+                const path = currentDir ? `${currentDir}/${f}` : f;
+                await fetch('/api/files/save', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({appName:name, filePath:path, content:""})}); 
+                load(currentDir); 
+            } 
+        };
+
+        window.createNewFolder = async () => {
+            const folderName = prompt("Nama folder baru:");
+            if (!folderName) return;
+            const path = currentDir ? `${currentDir}/${folderName}` : folderName;
+            try {
+                const response = await fetch('/api/files/mkdir', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ appName: name, path: path }) });
+                if (response.ok) load(currentDir);
+                else alert("Gagal membuat folder.");
+            } catch (e) { alert("Terjadi kesalahan koneksi."); }
+        };
+
+        load();
+    </script>
+</body>
+</html>

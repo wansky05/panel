@@ -1,0 +1,26 @@
+{
+  "name": "xixy-panel",
+  "version": "1.0.0",
+  "description": "Control Panel Xixy",
+  "main": "server.js",
+  "scripts": {
+    "start": "pm2 start server.js --name MainServer && tail -f /dev/null"
+  },
+  "keywords": [],
+  "author": "iwan",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "adm-zip": "^0.5.16",
+    "ansi-to-html": "^0.7.2",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0",
+    "fs-extra": "^11.3.3",
+    "multer": "^2.0.2",
+    "node-pty": "^1.1.0",
+    "pm2": "^6.0.14",
+    "socket.io": "^4.8.3",
+    "tar": "^7.5.7"
+  }
+}

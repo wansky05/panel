@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - XIXY PANEL</title>
+    <style>
+        body { 
+            background-color: #0d1117; 
+            color: white; 
+            display: flex; 
+            flex-direction: column; 
+            min-height: 100vh; 
+            -webkit-tap-highlight-color: transparent; 
+            margin: 0;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+        .bg-ptero-card { background-color: #161b22; }
+        .logo-glow { 
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.3); 
+            border: 1px solid rgba(59, 130, 246, 0.2); 
+            transition: all 0.3s ease; 
+        }
+        
+        /* Animasi Pulse */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+        .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+
+        /* Hover effect Card */
+        .app-card { 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            border: 1px solid #1f2937; 
+            background-color: #1a1f26;
+            cursor: pointer;
+        }
+        .app-card:hover { 
+            border-color: #3b82f6; 
+            transform: translateY(-5px); 
+            box-shadow: 0 10px 30px -10px rgba(59, 130, 246, 0.3); 
+        }
+        .app-card:hover h3 { color: #60a5fa; }
+
+        /* Media Queries untuk Mobile */
+        @media (max-width: 768px) {
+            .nav-container { padding-left: 24px !important; padding-right: 24px !important; }
+            .main-content { padding: 24px !important; }
+            .header-flex { flex-direction: column !important; align-items: flex-start !important; gap: 24px !important; }
+            .btn-new-app { width: 100% !important; }
+            .footer-flex { flex-direction: column !important; gap: 32px !important; text-align: center !important; }
+            .grid-list { grid-template-columns: 1fr !important; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="bg-ptero-card nav-container" style="padding: 16px; border-bottom: 1px solid #1f2937; display: flex; justify-content: space-between; align-items: center; padding-left: 40px; padding-right: 40px; position: sticky; top: 0; z-index: 50; box-sizing: border-box;">
+        <div style="display: flex; align-items: center; gap: 16px; cursor: pointer;" onclick="location.reload()">
+            <div class="logo-glow" style="width: 44px; height: 44px; border-radius: 9999px; overflow: hidden; padding: 6px; display: flex; align-items: center; justify-content: center; background-color: #0d1117; box-sizing: border-box;">
+                <img src="/logo.png" onerror="this.src='https://ui-avatars.com/api/?name=X&background=3b82f6&color=fff'" style="width: 100%; height: 100%; object-fit: cover; border-radius: 9999px;">
+            </div>
+            <div style="display: flex; flex-direction: column;">
+                <h1 style="color: white; font-weight: 900; letter-spacing: -0.05em; font-size: 18px; margin: 0;">XIXY PANEL</h1>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span class="animate-pulse" style="width: 6px; height: 6px; background-color: #3b82f6; border-radius: 9999px;"></span>
+                    <span style="font-size: 9px; color: #3b82f6; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; font-style: italic;">Home</span>
+                </div>
+            </div>
+        </div>
+        <button onclick="logout()" style="font-size: 10px; color: #ef4444; font-weight: 700; text-transform: uppercase; border: 1px solid rgba(239, 68, 68, 0.3); padding: 8px 16px; border-radius: 12px; background: transparent; cursor: pointer; transition: 0.3s; box-shadow: 0 1px 2px rgba(0,0,0,0.05);" onmouseover="this.style.backgroundColor='#ef4444'; this.style.color='white'" onmouseout="this.style.backgroundColor='transparent'; this.style.color='#ef4444'">Logout</button>
+    </nav>
+
+    <main class="main-content" style="padding: 40px; max-width: 1152px; margin-left: auto; margin-right: auto; width: 100%; flex: 1; box-sizing: border-box;">
+        <div class="header-flex" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; gap: 24px;">
+            <div>
+                <h2 style="font-size: 30px; font-weight: 700; letter-spacing: -0.025em; color: white; margin: 0;">My Instances</h2>
+                <p style="color: #6b7280; font-size: 12px; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; margin: 4px 0 0 0;">Total Active Apps: <span id="app-count" style="color: #3b82f6;">0</span></p>
+            </div>
+            <button onclick="createNewApp()" class="btn-new-app" style="background-color: #2563eb; color: white; border: none; padding: 12px 24px; border-radius: 16px; font-weight: 700; font-size: 12px; cursor: pointer; box-shadow: 0 10px 15px -3px rgba(30, 58, 138, 0.3); transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px;" onmouseover="this.style.backgroundColor='#1d4ed8'" onmouseout="this.style.backgroundColor='#2563eb'">
+                <span style="font-size: 18px; line-height: 1;">+</span> NEW APPLICATION
+            </button>
+        </div>
+
+        <div id="app-list" class="grid-list" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;">
+            <div style="grid-column: 1 / -1; padding-top: 80px; padding-bottom: 80px; text-align: center; color: #4b5563; text-transform: uppercase; letter-spacing: 0.3em; font-weight: 700; font-size: 10px;" class="animate-pulse">
+                Scanning /apps folder...
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-ptero-card" style="border-top: 1px solid #1f2937; padding: 32px; margin-top: 40px;">
+        <div class="footer-flex" style="max-width: 1152px; margin-left: auto; margin-right: auto; display: flex; justify-content: space-between; align-items: center; gap: 32px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 32px; height: 32px; border-radius: 9999px; border: 1px solid #1f2937; overflow: hidden; padding: 4px; box-sizing: border-box;">
+                    <img src="/logo.png" onerror="this.src='https://ui-avatars.com/api/?name=X&background=3b82f6&color=fff'" style="width: 100%; height: 100%; object-fit: cover; border-radius: 9999px; opacity: 0.4;">
+                </div>
+                <div style="text-align: left;">
+                    <p style="font-size: 10px; color: #6b7280; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 4px 0;">&copy; 2026 XIXY PANEL</p>
+                    <p style="font-size: 8px; color: #374151; text-transform: uppercase; letter-spacing: -0.025em; margin: 0;">Automated Process Management</p>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 24px;">
+                <div style="text-align: right;">
+                    <p style="font-size: 9px; color: #4b5563; font-weight: 700; text-transform: uppercase; letter-spacing: -0.025em; margin: 0;">Server Status</p>
+                    <span style="font-size: 10px; color: #22c55e; font-weight: 700; display: flex; align-items: center; gap: 8px; justify-content: flex-end;">
+                        <span class="animate-pulse" style="width: 6px; height: 6px; background-color: #22c55e; border-radius: 9999px;"></span> OPERATIONAL
+                    </span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Script tetap sama untuk logika fungsionalitas
+        async function loadApps() {
+            try {
+                const r = await fetch('/api/apps');
+                const data = await r.json();
+                const list = document.getElementById('app-list');
+                document.getElementById('app-count').innerText = data.length;
+                
+                if (data.length === 0) {
+                    list.innerHTML = `
+                        <div style="grid-column: 1 / -1; padding: 80px; border: 2px dashed #1f2937; border-radius: 24px; text-align: center;">
+                            <p style="color: #4b5563; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; margin: 0;">No Applications Found</p>
+                            <p style="color: #374151; font-size: 9px; margin-top: 8px; font-style: italic; opacity: 0.6; margin-bottom: 0;">Create your first folder in /apps to begin.</p>
+                        </div>`;
+                    return;
+                }
+
+                list.innerHTML = data.map(a => `
+                    <div onclick="location.href='/dashboard/${a.name}/console'" class="app-card" style="padding: 24px; border-radius: 24px; position: relative; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);">
+                        <div style="position: absolute; top: 0; right: 0; padding: 16px;">
+                            <span style="color: ${a.status==='online'?'#4ade80':'#f87171'}; background-color: ${a.status==='online'?'rgba(74, 222, 128, 0.1)':'rgba(248, 113, 113, 0.1)'}; border: 1px solid ${a.status==='online'?'rgba(74, 222, 128, 0.2)':'rgba(248, 113, 113, 0.2)'}; font-size: 8px; font-weight: 900; text-transform: uppercase; padding: 4px 8px; border-radius: 8px; letter-spacing: 0.05em;">
+                                ${a.status}
+                            </span>
+                        </div>
+
+                        <div style="width: 48px; height: 48px; background-color: #111827; border-radius: 16px; display: flex; align-items: center; justify-content: center; border: 1px solid #1f2937; margin-bottom: 20px;">
+                            <span style="font-size: 18px;">📦</span>
+                        </div>
+
+                        <h3 style="font-weight: 700; font-size: 18px; color: white; margin: 0 0 4px 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-right: 64px; transition: 0.3s;">${a.name.replace(/_/g, ' ')}</h3>
+                        <p style="font-size: 9px; color: #4b5563; font-family: monospace; font-style: italic; margin: 0 0 24px 0;">/apps/${a.name}</p>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; border-top: 1px solid rgba(31, 41, 55, 0.5); pt-20px; margin-top: 0; padding-top: 20px;">
+                            <div>
+                                <p style="font-size: 9px; color: #6b7280; font-weight: 700; text-transform: uppercase; letter-spacing: -0.025em; margin: 0 0 4px 0;">CPU Usage</p>
+                                <p style="font-size: 14px; font-family: monospace; color: #60a5fa; margin: 0;">${a.cpu}%</p>
+                            </div>
+                            <div>
+                                <p style="font-size: 9px; color: #6b7280; font-weight: 700; text-transform: uppercase; letter-spacing: -0.025em; margin: 0 0 4px 0;">Memory Usage</p>
+                                <p style="font-size: 14px; font-family: monospace; color: #4ade80; margin: 0;">${a.memory}</p>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (e) {
+                console.error("Load Error:", e);
+            }
+        }
+
+        async function createNewApp() {
+            const name = prompt("Masukan Nama APP:");
+            if (!name) return;
+
+            const btn = event.currentTarget;
+            const originalText = btn.innerHTML;
+            btn.innerText = "CREATING...";
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/api/apps/create', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ name: name.trim() })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    location.href = `/dashboard/${result.name}/console`;
+                } else {
+                    alert("Error: " + (result.error || "Failed."));
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            } catch (err) {
+                alert("Connection failed.");
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        function logout() {
+            location.href = '/login';
+        }
+
+        loadApps();
+        setInterval(loadApps, 5000);
+    </script>
+</body>
+</html>
